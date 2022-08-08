@@ -1,33 +1,28 @@
 /* eslint-disable no-unused-vars */
-import { FC, useEffect } from "react";
+import { FC, useEffect } from 'react';
 import logo from "./logo.svg";
 import "./App.css";
 import * as duckdb from "@duckdb/duckdb-wasm";
 import duckdb_wasm from "@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm";
 import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm";
+import duckdb_worker_mvp from "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js";
+import duckdb_worker_eh from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js";
 
-// select a bundle based on browser checks
-const DUCKDB_BUNDLES: duckdb.DuckDBBundles = {
+const WEBPACK_BUNDLES = {
   mvp: {
     mainModule: duckdb_wasm,
-    mainWorker: new URL(
-      "@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
-      import.meta.url
-    ).toString(),
+    mainWorker: duckdb_worker_mvp,
   },
   eh: {
     mainModule: duckdb_wasm_eh,
-    mainWorker: new URL(
-      "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js",
-      import.meta.url
-    ).toString(),
-  },
+    mainWorker: duckdb_worker_eh,
+  }
 };
 
 const App: FC = ({}) => {
   useEffect(() => {
     const resolveDatabase = async () => {
-      const bundle = await duckdb.selectBundle(DUCKDB_BUNDLES);
+      const bundle = await duckdb.selectBundle(WEBPACK_BUNDLES);
       // init async duckdb-wasm
       const worker = new Worker(bundle.mainWorker!);
       const logger = new duckdb.ConsoleLogger();
